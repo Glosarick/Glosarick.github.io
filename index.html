@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <title>Relojes Ordinario</title>
+</head>
+<style>
+    body {
+        background-color: black;
+    }
+
+    #horaLaPazInput {
+        padding: 10px;
+        font-size: 16px;
+        border: 4px solid #cccccc;
+        border-radius: 5px;
+        width: 100px;
+    }
+
+    #horaLaPazInput:focus {
+        border-color: #007BFF;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        outline: none;
+        color: blue;
+    }
+</style>
+
+<body>
+    <script>
+        // Constantes y variables globales
+        const relogRadio = 115;
+        const horario = 50;
+        const minutero = 80;
+        const segundero = 90;
+        const grosorHorario = 3.5;
+        const grosorMinutero = 1.5;
+        const grosorSegundero = 0.5;
+
+        let inputHoraLaPaz;
+
+        let horaLaPaz = 11;
+        let minutoLaPaz = 59;
+        let segundoLaPaz = 54;
+
+        // Funciones
+        function puntoMedio(xc, yc) {
+            let x = 0;
+            let y = relogRadio;
+            let p = 5 / 4 - relogRadio;
+
+            while (x < y) {
+                x++;
+                if (p < 0) {
+                    p += 2 * x + 1;
+                } else {
+                    y--;
+                    p += 2 * x + 1 - 2 * y;
+                }
+
+                let puntos = [
+                    [x, y], [y, x], [-y, x], [-x, y],
+                    [-x, -y], [-y, -x], [y, -x], [x, -y]
+                ];
+
+                for (let i = 0; i < puntos.length; i++) {
+                    let puntoX = puntos[i][0];
+                    let puntoY = puntos[i][1];
+
+                    ellipse(xc + puntoX, yc + puntoY, 2, 2,);
+                }
+            }
+        }
+
+        function puntoPendiente(x1, y1, x2, y2, grosor) {
+            let dx = x2 - x1;
+            let dy = y2 - y1;
+
+            if (Math.abs(dx) < Math.abs(dy)) {
+                let pasos = Math.abs(dy);
+                let incrementoX = dx / pasos;
+                let incrementoY = dy / pasos;
+                let x = x1;
+                let y = y1;
+
+                for (let i = 0; i <= pasos; i++) {
+                    for (let j = -grosor; j <= grosor; j++) {
+                        point(x + j, y);
+                    }
+                    x += incrementoX;
+                    y += incrementoY;
+                }
+            } else {
+                let pasos = Math.abs(dx);
+                let incrementoX = dx / pasos;
+                let incrementoY = dy / pasos;
+                let x = x1;
+                let y = y1;
+
+                for (let i = 0; i <= pasos; i++) {
+                    for (let j = -grosor; j <= grosor; j++) {
+                        point(x, y + j);
+                    }
+                    x += incrementoX;
+                    y += incrementoY;
+                }
+            }
+        }
+
+        function DDA(x1, y1, x2, y2, grosor) {
+            let dx = x2 - x1;
+            let dy = y2 - y1;
+            let pasos = Math.max(Math.abs(dx), Math.abs(dy));
+            let incrementoX = dx / pasos;
+            let incrementoY = dy / pasos;
+            let x = x1;
+            let y = y1;
+
+            for (let i = 0; i <= pasos; i++) {
+                for (let j = -grosor / 2; j <= grosor / 2; j++) {
+                    point(x + j, y);
+                }
+                x += incrementoX;
+                y += incrementoY;
+            }
+        }
+
+        function bresenham(x1, y1, x2, y2, grosor) {
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+            let sx = (x1 < x2) ? 1 : -1;
+            let sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+
+            strokeWeight(grosor);
+
+            while (Math.round(x1) !== Math.round(x2) || Math.round(y1) !== Math.round(y2)) {
+                point(x1, y1);
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
+        }
+
+        function pintarNumeros() {
+            textSize(18);
+            textAlign(CENTER, CENTER);
+            for (let i = 1; i <= 12; i++) {
+                let angulo = map(i, 0, 12, 0, 360) - 90;
+                let x = (relogRadio - 15) * cos(angulo);
+                let y = (relogRadio - 15) * sin(angulo);
+                text(i, x, y);
+            }
+        }
+
+        function relogLaPaz(x, y, hora, minuto, segundo, ciudad) {
+            fill("orange");
+            stroke("orange");
+            strokeWeight(3);
+            puntoMedio(x, y);
+            push();
+            translate(x, y);
+            pintarNumeros();
+
+            let anguloHora = map(hora % 12, 0, 12, 0, 360) - 90;
+            manecillasPP(horario, anguloHora, grosorHorario, color("orange"));
+
+            let anguloMinuto = map(minuto, 0, 60, 0, 360) - 90;
+            manecillasPP(minutero, anguloMinuto, grosorMinutero, color("orange"));
+
+            let anguloSegundo = map(segundo, 0, 60, 0, 360) - 90;
+            manecillasPP(segundero, anguloSegundo, grosorSegundero, color("red"));
+
+            pop();
+
+            fill("white");
+            stroke("white");
+            strokeWeight(1);
+            textSize(20);
+            textAlign(CENTER, CENTER);
+            text(ciudad, x, y + relogRadio + 25);
+        }
+
+        function manecillasPP(largo, angulo, grosor, color) {
+            stroke(color);
+            puntoPendiente(0, 0, largo * cos(angulo), largo * sin(angulo), grosor);
+        }
+
+        function relogCiudadMex(x, y, hora, minuto, segundo, ciudad) {
+            stroke("blue");
+            fill("blue");
+            strokeWeight(3);
+            puntoMedio(x, y);
+            push();
+            translate(x, y);
+            pintarNumeros();
+
+            let anguloHora = map(hora % 12, 0, 12, 0, 360) - 90;
+            manecillasDDA(horario, anguloHora, grosorHorario + 1.5, color("blue"));
+
+            let anguloMinuto = map(minuto, 0, 60, 0, 360) - 90;
+            manecillasDDA(minutero, anguloMinuto, grosorMinutero + 1, color("blue"));
+
+            let anguloSegundo = map(segundo, 0, 60, 0, 360) - 90;
+            manecillasDDA(segundero, anguloSegundo, grosorSegundero, color("red"));
+
+            pop();
+
+            fill("white");
+            stroke("white");
+            strokeWeight(1);
+            textSize(20);
+            textAlign(CENTER, CENTER);
+            text(ciudad, x, y + relogRadio + 25);
+        }
+
+        function manecillasDDA(largo, angulo, grosor, color) {
+            stroke(color);
+            DDA(0, 0, largo * cos(angulo), largo * sin(angulo), grosor);
+        }
+
+        function relogBarcelona(x, y, hora, minuto, segundo, ciudad) {
+            fill("green");
+            stroke("green");
+            strokeWeight(3);
+            puntoMedio(x, y);
+            push();
+            translate(x, y);
+            pintarNumeros();
+
+            let anguloHora = map(hora % 12, 0, 12, 0, 360) - 90;
+            manecillasBresenham(horario, anguloHora, grosorHorario + 2, "green");
+
+            let anguloMinuto = map(minuto, 0, 60, 0, 360) - 90;
+            manecillasBresenham(minutero, anguloMinuto, grosorMinutero + 1.5, "green");
+
+            let anguloSegundo = map(segundo, 0, 60, 0, 360) - 90;
+            manecillasBresenham(segundero, anguloSegundo, grosorSegundero + 1, "red");
+
+            pop();
+
+            fill("white");
+            stroke("white");
+            strokeWeight(1);
+            textSize(20);
+            textAlign(CENTER, CENTER);
+            text(ciudad, x, y + relogRadio + 25);
+        }
+
+        function manecillasBresenham(length, angle, thickness, color) {
+            stroke(color);
+            bresenham(0, 0, length * cos(angle), length * sin(angle), thickness);
+        }
+
+        function draw() {
+            segundoLaPaz++;
+            if (segundoLaPaz === 60) {
+                segundoLaPaz = 0;
+                minutoLaPaz++;
+                if (minutoLaPaz === 60) {
+                    minutoLaPaz = 0;
+                    horaLaPaz++;
+                    if (horaLaPaz === 24) {
+                        horaLaPaz = 0;
+                    }
+                }
+            }
+            inputHoraLaPaz.value(`${horaLaPaz.toString().padStart(2, '0')}:${minutoLaPaz.toString().padStart(2, '0')}`);
+
+            background("black");
+
+            relogLaPaz(150, height / 2, horaLaPaz, minutoLaPaz, segundoLaPaz, "La Paz");
+
+            let horaCDMX = (horaLaPaz + 1 + 24) % 24;
+            relogCiudadMex(400, height / 2, horaCDMX, minutoLaPaz, segundoLaPaz, "Ciudad de México");
+
+            let horaBarcelona = (horaLaPaz + 9 + 24) % 24;
+            relogBarcelona(650, height / 2, horaBarcelona, minutoLaPaz, segundoLaPaz, "Barcelona");
+        }
+
+        function setup() {
+            let canvasX = (window.innerWidth - 800) / 2;
+            let canvasY = (window.innerHeight - 400) / 2;
+            createCanvas(800, 400).position(canvasX, canvasY);
+
+            background("black");
+            angleMode(DEGREES);
+
+            inputHoraLaPaz = createInput('11:59', 'time');
+            inputHoraLaPaz.position(canvasX + 340, canvasY + 15);
+            inputHoraLaPaz.id('horaLaPazInput');
+            inputHoraLaPaz.input(updateHoraLaPaz);
+            frameRate(1);
+        }
+
+        function updateHoraLaPaz() {
+            let horaInput = inputHoraLaPaz.value();
+            let horaArray = horaInput.split(':');
+            horaLaPaz = parseInt(horaArray[0]);
+            minutoLaPaz = parseInt(horaArray[1]);
+        }
+    </script>
+</body>
+
+</html>
