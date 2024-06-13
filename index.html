@@ -74,82 +74,6 @@
             }
         }
 
-        function puntoPendiente(x1, y1, x2, y2, grosor) {
-            let dx = x2 - x1;
-            let dy = y2 - y1;
-
-            if (Math.abs(dx) < Math.abs(dy)) {
-                let pasos = Math.abs(dy);
-                let incrementoX = dx / pasos;
-                let incrementoY = dy / pasos;
-                let x = x1;
-                let y = y1;
-
-                for (let i = 0; i <= pasos; i++) {
-                    for (let j = -grosor; j <= grosor; j++) {
-                        point(x + j, y);
-                    }
-                    x += incrementoX;
-                    y += incrementoY;
-                }
-            } else {
-                let pasos = Math.abs(dx);
-                let incrementoX = dx / pasos;
-                let incrementoY = dy / pasos;
-                let x = x1;
-                let y = y1;
-
-                for (let i = 0; i <= pasos; i++) {
-                    for (let j = -grosor; j <= grosor; j++) {
-                        point(x, y + j);
-                    }
-                    x += incrementoX;
-                    y += incrementoY;
-                }
-            }
-        }
-
-        function DDA(x1, y1, x2, y2, grosor) {
-            let dx = x2 - x1;
-            let dy = y2 - y1;
-            let pasos = Math.max(Math.abs(dx), Math.abs(dy));
-            let incrementoX = dx / pasos;
-            let incrementoY = dy / pasos;
-            let x = x1;
-            let y = y1;
-
-            for (let i = 0; i <= pasos; i++) {
-                for (let j = -grosor / 2; j <= grosor / 2; j++) {
-                    point(x + j, y);
-                }
-                x += incrementoX;
-                y += incrementoY;
-            }
-        }
-
-        function bresenham(x1, y1, x2, y2, grosor) {
-            let dx = Math.abs(x2 - x1);
-            let dy = Math.abs(y2 - y1);
-            let sx = (x1 < x2) ? 1 : -1;
-            let sy = (y1 < y2) ? 1 : -1;
-            let err = dx - dy;
-
-            strokeWeight(grosor);
-
-            while (Math.round(x1) !== Math.round(x2) || Math.round(y1) !== Math.round(y2)) {
-                point(x1, y1);
-                let e2 = 2 * err;
-                if (e2 > -dy) {
-                    err -= dy;
-                    x1 += sx;
-                }
-                if (e2 < dx) {
-                    err += dx;
-                    y1 += sy;
-                }
-            }
-        }
-
         function pintarNumeros() {
             textSize(18);
             textAlign(CENTER, CENTER);
@@ -189,6 +113,41 @@
             text(ciudad, x, y + relogRadio + 25);
         }
 
+        function puntoPendiente(x1, y1, x2, y2, grosor) {
+            let dx = x2 - x1;
+            let dy = y2 - y1;
+
+            if (Math.abs(dx) < Math.abs(dy)) {
+                let pasos = Math.abs(dy);
+                let incrementoX = dx / pasos;
+                let incrementoY = dy / pasos;
+                let x = x1;
+                let y = y1;
+
+                for (let i = 0; i <= pasos; i++) {
+                    for (let j = -grosor; j <= grosor; j++) {
+                        point(x + j, y);
+                    }
+                    x += incrementoX;
+                    y += incrementoY;
+                }
+            } else {
+                let pasos = Math.abs(dx);
+                let incrementoX = dx / pasos;
+                let incrementoY = dy / pasos;
+                let x = x1;
+                let y = y1;
+
+                for (let i = 0; i <= pasos; i++) {
+                    for (let j = -grosor; j <= grosor; j++) {
+                        point(x, y + j);
+                    }
+                    x += incrementoX;
+                    y += incrementoY;
+                }
+            }
+        }
+
         function manecillasPP(largo, angulo, grosor, color) {
             stroke(color);
             puntoPendiente(0, 0, largo * cos(angulo), largo * sin(angulo), grosor);
@@ -222,6 +181,24 @@
             text(ciudad, x, y + relogRadio + 25);
         }
 
+        function DDA(x1, y1, x2, y2, grosor) {
+            let dx = x2 - x1;
+            let dy = y2 - y1;
+            let pasos = Math.max(Math.abs(dx), Math.abs(dy));
+            let incrementoX = dx / pasos;
+            let incrementoY = dy / pasos;
+            let x = x1;
+            let y = y1;
+
+            for (let i = 0; i <= pasos; i++) {
+                for (let j = -grosor / 2; j <= grosor / 2; j++) {
+                    point(x + j, y);
+                }
+                x += incrementoX;
+                y += incrementoY;
+            }
+        }
+
         function manecillasDDA(largo, angulo, grosor, color) {
             stroke(color);
             DDA(0, 0, largo * cos(angulo), largo * sin(angulo), grosor);
@@ -253,6 +230,29 @@
             textSize(20);
             textAlign(CENTER, CENTER);
             text(ciudad, x, y + relogRadio + 25);
+        }
+
+        function bresenham(x1, y1, x2, y2, grosor) {
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+            let sx = (x1 < x2) ? 1 : -1;
+            let sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+
+            strokeWeight(grosor);
+
+            while (Math.round(x1) !== Math.round(x2) || Math.round(y1) !== Math.round(y2)) {
+                point(x1, y1);
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
         }
 
         function manecillasBresenham(length, angle, thickness, color) {
